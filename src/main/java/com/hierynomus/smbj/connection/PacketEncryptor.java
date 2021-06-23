@@ -23,8 +23,6 @@ import com.hierynomus.security.SecurityException;
 import com.hierynomus.security.SecurityProvider;
 import com.hierynomus.smb.SMBBuffer;
 import com.hierynomus.smbj.common.SMBRuntimeException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
@@ -32,7 +30,6 @@ import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class PacketEncryptor {
-    private static final Logger logger = LoggerFactory.getLogger(PacketEncryptor.class);
     private SecurityProvider securityProvider;
     private SMB3EncryptionCipher cipher;
     private SMB2Dialect dialect;
@@ -51,7 +48,7 @@ public class PacketEncryptor {
         } else {
             cipher = SMB3EncryptionCipher.AES_128_CCM;
         }
-        logger.info("Initialized PacketEncryptor with Cipher << {} >>", cipher);
+        System.out.println("tempGT2: Initialized PacketEncryptor with Cipher << " + cipher +" >>");
     }
 
     public boolean canDecrypt(SMB3EncryptedPacketData packetData) {
@@ -81,10 +78,10 @@ public class PacketEncryptor {
                 return bytes2;
             }
         } catch (SecurityException e) {
-            logger.error("Security exception while decrypting packet << {} >>", packetData);
+            System.out.println("tempGT2: Security exception while decrypting packet << " + packetData + " >>");
             throw new SMBRuntimeException(e);
         } catch (Buffer.BufferException be) {
-            logger.error("Could not read cipherText from packet << {} >>", packetData);
+            System.out.println("tempGT2: Could not read cipherText from packet << " + packetData + " >>");
             throw new SMBRuntimeException("Could not read cipherText from packet", be);
         }
     }
@@ -93,7 +90,7 @@ public class PacketEncryptor {
         if (encryptionKey != null) {
             return new EncryptedPacketWrapper(packet, encryptionKey);
         } else {
-            logger.debug("Not wrapping {} as encrypted, as no key is set.", packet.getHeader().getMessage());
+            System.out.println("tempGT2: Not wrapping " + packet.getHeader().getMessage() + " as encrypted, as no key is set.");
             return packet;
         }
     }
@@ -151,7 +148,7 @@ public class PacketEncryptor {
                 aeadBlockCipher.updateAAD(aad, 0, aad.length);
                 cipherTextWithMac = aeadBlockCipher.doFinal(plainText, 0, plainText.length);
             } catch (SecurityException e) {
-                logger.error("Security exception while encrypting packet << {} >>", packet.getHeader());
+                System.out.println("tempGT2: Security exception while encrypting packet << " + packet.getHeader() + " >>");
                 throw new SMBRuntimeException(e);
             }
 

@@ -18,8 +18,6 @@ package com.hierynomus.ntlm.messages;
 import com.hierynomus.protocol.commons.Charsets;
 import com.hierynomus.protocol.commons.EnumWithValue;
 import com.hierynomus.protocol.commons.buffer.Buffer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.EnumSet;
 
@@ -27,8 +25,6 @@ import java.util.EnumSet;
  * [MS-NLMP].pdf 2.2.1.2 CHALLENGE_MESSAGE
  */
 public class NtlmChallenge extends NtlmPacket {
-    private static final Logger logger = LoggerFactory.getLogger(NtlmChallenge.class);
-
     private int targetNameLen;
     private int targetNameBufferOffset;
     private EnumSet<NtlmNegotiateFlag> negotiateFlags;
@@ -72,7 +68,7 @@ public class NtlmChallenge extends NtlmPacket {
     private void readVersion(Buffer.PlainBuffer buffer) throws Buffer.BufferException {
         if (negotiateFlags.contains(NtlmNegotiateFlag.NTLMSSP_NEGOTIATE_VERSION)) {
             this.version = new WindowsVersion().readFrom(buffer);
-            logger.debug("Windows version = {}", this.version);
+            System.out.println("tempGT2: Windows version = "+ this.version);
         } else {
             buffer.skip(8);
         }

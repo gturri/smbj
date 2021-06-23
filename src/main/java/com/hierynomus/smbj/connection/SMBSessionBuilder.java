@@ -40,8 +40,6 @@ import com.hierynomus.smbj.utils.DigestUtil;
 import com.hierynomus.spnego.NegTokenInit;
 import com.hierynomus.spnego.NegTokenInit2;
 import com.hierynomus.spnego.SpnegoException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -76,7 +74,6 @@ public class SMBSessionBuilder {
     static final String AES_128_CMAC_ALGORITHM = "AesCmac";
 
 
-    private static final Logger logger = LoggerFactory.getLogger(SMBSessionBuilder.class);
     private final SmbConfig config;
     private final ConnectionContext connectionContext;
     private final SessionFactory sessionFactory;
@@ -107,7 +104,7 @@ public class SMBSessionBuilder {
             processAuthenticationToken(ctx, connectionContext.getGssNegotiateToken());
 
             Session session = setupSession(ctx);
-            logger.info("Successfully authenticated {} on {}, session is {}", authContext.getUsername(), connection.getRemoteHostname(), session.getSessionId());
+            System.out.println("tempGT2: Successfully authenticated " + authContext.getUsername() + " on " + connection.getRemoteHostname() + ", session is " + session.getSessionId());
             sessionTable.registerSession(session.getSessionId(), session);
             return session;
         } catch (SpnegoException | IOException e) {
@@ -137,7 +134,7 @@ public class SMBSessionBuilder {
                 updatePreauthIntegrityValue(ctx, preauthSession.getSessionContext(), ctx.request);
                 updatePreauthIntegrityValue(ctx, preauthSession.getSessionContext(), ctx.response);
             }
-            logger.debug("More processing required for authentication of {} using {}", ctx.authContext.getUsername(), ctx.authenticator);
+            System.out.println("tempGT2: More processing required for authentication of " + ctx.authContext.getUsername() + " using " + ctx.authenticator);
             processAuthenticationToken(ctx, response.getSecurityBuffer());
             return setupSession(ctx);
         } else if (response.getHeader().getStatusCode() != NtStatus.STATUS_SUCCESS.getValue()) {
@@ -295,7 +292,7 @@ public class SMBSessionBuilder {
             fixedSuffixTemp.write(context);
             fixedSuffixTemp.write(new byte[]{0x0, 0x0, 0x0, (byte) 0x80}); // 128 bits (BE byte order)
         } catch (IOException e) {
-            logger.error("Unable to format suffix, error occur : ", e);
+            System.out.println("tempGT2: Unable to format suffix, error occur : " + e);
             return null;
         }
         try {

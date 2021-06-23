@@ -21,8 +21,6 @@ import com.hierynomus.protocol.transport.TransportException;
 import com.hierynomus.smbj.connection.PacketSignatory;
 import com.hierynomus.smbj.connection.SessionTable;
 import com.hierynomus.smbj.session.Session;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static com.hierynomus.mssmb2.SMB2MessageCommandCode.SMB2_SESSION_SETUP;
 import static com.hierynomus.mssmb2.SMB2MessageFlag.SMB2_FLAGS_SIGNED;
@@ -65,7 +63,6 @@ import static com.hierynomus.mssmb2.SMB2MessageFlag.SMB2_FLAGS_SIGNED;
  * as specified in subsequent sections.<152>
  */
 public class SMB2SignatureVerificationPacketHandler extends SMB2PacketHandler {
-    private static final Logger logger = LoggerFactory.getLogger(SMB2SignatureVerificationPacketHandler.class);
     private SessionTable sessionTable;
     private PacketSignatory signatory;
 
@@ -77,13 +74,13 @@ public class SMB2SignatureVerificationPacketHandler extends SMB2PacketHandler {
     @Override
     protected void doSMB2Handle(SMB2PacketData packetData) throws TransportException {
         if (packetData.getHeader().getMessageId() == 0xFFFFFFFFFFFFFFFFL) {
-            logger.debug("Message ID is 0xFFFFFFFFFFFFFFFF, no verification necessary");
+            System.out.println("tempGT2: Message ID is 0xFFFFFFFFFFFFFFFF, no verification necessary");
             next.handle(packetData);
             return;
         }
 
         if (packetData.isDecrypted()) {
-            logger.debug("Passthrough Signature Verification as packet is decrypted");
+            System.out.println("tempGT2: Passthrough Signature Verification as packet is decrypted");
             next.handle(packetData);
             return;
         }
@@ -98,17 +95,17 @@ public class SMB2SignatureVerificationPacketHandler extends SMB2PacketHandler {
             Session session = sessionTable.find(sessionId);
 
             if (session == null) {
-                logger.error("Could not find session << {} >> for packet {}.", sessionId, packetData);
+                System.out.println("tempGT2: Could not find session << " + sessionId + " >> for packet " + packetData);
                 next.handle(new DeadLetterPacketData(packetData.getHeader()));
                 return;
             }
 
             if (signatory.verify(packetData, session.getSigningKey(packetData.getHeader(), false))) {
-                logger.debug("Signature for packet {} verified.", packetData);
+                System.out.println("tempGT2: Signature for packet " + packetData + " verified.");
                 next.handle(packetData);
                 return;
             } else {
-                logger.warn("Invalid packet signature for packet {}", packetData);
+                System.out.println("tempGT2: Invalid packet signature for packet " + packetData);
                 next.handle(new DeadLetterPacketData(packetData.getHeader()));
                 return;
             }
@@ -121,7 +118,7 @@ public class SMB2SignatureVerificationPacketHandler extends SMB2PacketHandler {
                 long sessionId = packetData.getHeader().getSessionId();
                 Session session = sessionTable.find(sessionId);
                 if (session != null && session.isSigningRequired()) {
-                    logger.warn("Illegal request, session requires message signing, but packet {} is not signed.", packetData);
+                    System.out.println("tempGT2: Illegal request, session requires message signing, but packet " + packetData + " is not signed.");
                     next.handle(new DeadLetterPacketData(packetData.getHeader()));
                     return;
                 }
@@ -132,7 +129,6 @@ public class SMB2SignatureVerificationPacketHandler extends SMB2PacketHandler {
 //
 //    private void verifyPacketSignature(SMB2Packet packet, Session session) throws TransportException {
 //        if (!session.getPacketSignatory().verify(packet)) {
-//            logger.warn("Invalid packet signature for packet {}", packet);
 //            if (session.isSigningRequired()) {
 //                throw new TransportException("Packet signature for packet " + packet + " was not correct");
 //            }
@@ -140,7 +136,6 @@ public class SMB2SignatureVerificationPacketHandler extends SMB2PacketHandler {
 //    } else if(session.isSigningRequired())
 //
 //    {
-//        logger.warn("Illegal request, session requires message signing, but packet {} is not signed.", packet);
 //        throw new TransportException("Session requires signing, but packet " + packet + " was not signed");
 //    }
 //}

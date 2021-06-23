@@ -22,11 +22,8 @@ import com.hierynomus.protocol.PacketData;
 import com.hierynomus.protocol.transport.PacketReceiver;
 import com.hierynomus.protocol.transport.TransportException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public abstract class PacketReader<D extends PacketData<?>> implements Runnable {
-    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     protected InputStream in;
     private PacketReceiver<D> handler;
@@ -50,25 +47,25 @@ public abstract class PacketReader<D extends PacketData<?>> implements Runnable 
                 if (stopped.get()) {
                     break;
                 }
-                logger.info("PacketReader error, got exception.", e);
+                System.out.println("tempGT2: PacketReader error, got exception." + e);
                 handler.handleError(e);
                 return;
             }
         }
         if (stopped.get()) {
-            logger.info("{} stopped.", thread);
+            System.out.println("tempGT2: " + thread + " stopped.");
         }
     }
 
     public void stop() {
-        logger.debug("Stopping PacketReader...");
+        System.out.println("tempGT2: Stopping PacketReader...");
         stopped.set(true);
         thread.interrupt();
     }
 
     private void readPacket() throws TransportException {
         D packet = doRead();
-        logger.debug("Received packet {}", packet);
+        System.out.println("tempGT2: Received packet " + packet);
         handler.handle(packet);
     }
 
@@ -81,7 +78,7 @@ public abstract class PacketReader<D extends PacketData<?>> implements Runnable 
     protected abstract D doRead() throws TransportException;
 
     public void start() {
-        logger.debug("Starting PacketReader on thread: {}", thread.getName());
+        System.out.println("tempGT2: Starting PacketReader on thread: " + thread.getName());
         this.thread.start();
     }
 }

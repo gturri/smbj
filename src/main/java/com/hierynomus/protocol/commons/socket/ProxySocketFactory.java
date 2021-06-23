@@ -15,9 +15,6 @@
  */
 package com.hierynomus.protocol.commons.socket;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import javax.net.SocketFactory;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -26,7 +23,6 @@ import java.net.Proxy;
 import java.net.Socket;
 
 public class ProxySocketFactory extends SocketFactory {
-    private static final Logger logger = LoggerFactory.getLogger(ProxySocketFactory.class);
     public static final int DEFAULT_CONNECT_TIMEOUT = 5000;
 
     private Proxy proxy;
@@ -83,7 +79,7 @@ public class ProxySocketFactory extends SocketFactory {
         if (bindAddress != null) {
             socket.bind(bindAddress);
         }
-        logger.debug("Connecting to {}", address);
+        System.out.println("tempGT2: Connecting to " + address);
         socket.connect(address, connectTimeout);
         return socket;
     }

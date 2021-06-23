@@ -28,11 +28,8 @@ import com.hierynomus.mssmb2.messages.submodule.SMB2LockElement;
 import com.hierynomus.smbj.common.SmbPath;
 import com.hierynomus.smbj.share.OperationBuckets.OperationBucket;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Open<S extends Share> implements Closeable {
-    protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     protected S share;
     protected SMB2FileId fileId;
@@ -96,7 +93,7 @@ public class Open<S extends Share> implements Closeable {
         try {
             close();
         } catch (Exception e) {
-            logger.warn("{} close failed for {},{},{}", this.getClass().getSimpleName(), name, share, fileId, e);
+            System.out.println("tempGT2: {} close failed for " + this.getClass().getSimpleName() + ", " + name + ", " + share + ", " + fileId + ", " + e);
         }
     }
 

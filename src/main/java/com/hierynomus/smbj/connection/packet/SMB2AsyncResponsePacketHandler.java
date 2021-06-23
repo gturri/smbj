@@ -19,8 +19,6 @@ import com.hierynomus.mssmb2.SMB2PacketData;
 import com.hierynomus.protocol.transport.TransportException;
 import com.hierynomus.smbj.connection.OutstandingRequests;
 import com.hierynomus.smbj.connection.Request;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * 3.2.5.1.5 Handling Asynchronous Responses
@@ -35,7 +33,6 @@ import org.slf4j.LoggerFactory;
  * continue as specified below.
  */
 public class SMB2AsyncResponsePacketHandler extends SMB2PacketHandler {
-    private static final Logger logger = LoggerFactory.getLogger(SMB2AsyncResponsePacketHandler.class);
     private OutstandingRequests outstandingRequests;
 
     public SMB2AsyncResponsePacketHandler(OutstandingRequests outstandingRequests) {
@@ -45,11 +42,11 @@ public class SMB2AsyncResponsePacketHandler extends SMB2PacketHandler {
     @Override
     protected void doSMB2Handle(SMB2PacketData packetData) throws TransportException {
         Request request = outstandingRequests.getRequestByMessageId(packetData.getHeader().getMessageId());
-        logger.trace("Send/Recv of packet {} took << {} ms >>", packetData, System.currentTimeMillis() - request.getTimestamp().getTime());
+        System.out.println("tempGT2: Send/Recv of packet " + packetData + " took << " + (System.currentTimeMillis() - request.getTimestamp().getTime()) + " ms >>");
 
         // [MS-SMB2] 3.2.5.1.5 Handling Asynchronous Responses
         if (packetData.isIntermediateAsyncResponse()) {
-            logger.debug("Received ASYNC packet {} with AsyncId << {} >>", packetData, packetData.getHeader().getAsyncId());
+            System.out.println("tempGT2: Received ASYNC packet " + packetData + " with AsyncId << " + packetData.getHeader().getAsyncId() + ">>");
             request.setAsyncId(packetData.getHeader().getAsyncId());
             // TODO expiration timer
             return;

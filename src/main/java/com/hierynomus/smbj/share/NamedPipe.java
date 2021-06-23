@@ -24,14 +24,10 @@ import com.hierynomus.smb.SMBBuffer;
 import com.hierynomus.smbj.common.SMBRuntimeException;
 import com.hierynomus.smbj.common.SmbPath;
 import com.hierynomus.smbj.io.ArrayByteChunkProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class NamedPipe extends Open<PipeShare> {
     private static final long FSCTL_PIPE_PEEK = 0x0011400cL;
     private static final long FSCTL_PIPE_TRANSCEIVE = 0x0011c017L;
-
-    protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     NamedPipe(SMB2FileId fileId, PipeShare share, SmbPath name) {
         super(fileId, name, share);
@@ -61,7 +57,7 @@ public class NamedPipe extends Open<PipeShare> {
      */
     public int write(byte[] buffer, int offset, int length) {
         ArrayByteChunkProvider provider = new ArrayByteChunkProvider(buffer, offset, length, 0);
-        logger.debug("Writing to {} from offset {}", this.name, provider.getOffset());
+        System.out.println("tempGT2: Writing to " + this.name + " from offset " + provider.getOffset());
         SMB2WriteResponse wresp = share.write(fileId, provider);
         return (int) wresp.getBytesWritten();
     }

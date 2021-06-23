@@ -15,12 +15,7 @@
  */
 package com.hierynomus.protocol.commons;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class IOUtils {
-
-    private static final Logger logger = LoggerFactory.getLogger(IOUtils.class);
 
     public static void closeQuietly(AutoCloseable... closeables) {
         for (AutoCloseable c : closeables) {
@@ -29,7 +24,7 @@ public class IOUtils {
                     c.close();
                 }
             } catch (Exception logged) {
-                logger.warn("Error closing {} - {}", c, logged);
+                System.out.println("tempGT2: Error closing " + c + " - " + logged);
             }
         }
     }

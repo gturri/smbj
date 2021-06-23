@@ -19,8 +19,6 @@ import com.hierynomus.mssmb2.DeadLetterPacketData;
 import com.hierynomus.mssmb2.SMB2PacketData;
 import com.hierynomus.protocol.transport.TransportException;
 import com.hierynomus.smbj.connection.OutstandingRequests;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * [MS-SMB2] 3.2.5.1.2 Finding the Application Request for This Response
@@ -36,7 +34,6 @@ import org.slf4j.LoggerFactory;
  * Otherwise, the response MUST be discarded as invalid.
  */
 public class SMB2IsOutstandingPacketHandler extends SMB2PacketHandler {
-    private static final Logger logger = LoggerFactory.getLogger(SMB2IsOutstandingPacketHandler.class);
     private OutstandingRequests outstandingRequests;
 
     public SMB2IsOutstandingPacketHandler(OutstandingRequests outstandingRequests) {
@@ -48,7 +45,7 @@ public class SMB2IsOutstandingPacketHandler extends SMB2PacketHandler {
         long messageId = packetData.getSequenceNumber();
 
         if (!outstandingRequests.isOutstanding(messageId) && !packetData.isOplockBreakNotification()) {
-            logger.error("Received response with unknown sequence number << {} >>", messageId);
+            System.out.println("tempGT2: Received response with unknown sequence number << " + messageId + " >>");
             next.handle(new DeadLetterPacketData(packetData.getHeader()));
         } else {
             next.handle(packetData);

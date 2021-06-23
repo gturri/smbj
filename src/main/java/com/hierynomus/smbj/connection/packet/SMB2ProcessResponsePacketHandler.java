@@ -22,8 +22,6 @@ import com.hierynomus.protocol.commons.buffer.Buffer;
 import com.hierynomus.protocol.transport.TransportException;
 import com.hierynomus.smbj.connection.OutstandingRequests;
 import com.hierynomus.smbj.connection.Request;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * [MS-SMB2] 3.2.5.1.7 Handling Incorrectly Formatted Responses AND 3.2.5.1.8 Processing the Response
@@ -41,7 +39,6 @@ import org.slf4j.LoggerFactory;
  * error that indicates an invalid network response was received.
  */
 public class SMB2ProcessResponsePacketHandler extends SMB2PacketHandler {
-    private static final Logger logger = LoggerFactory.getLogger(SMB2ProcessResponsePacketHandler.class);
     private final SMB2MessageConverter smb2Converter;
     private final OutstandingRequests outstandingRequests;
 
@@ -58,7 +55,7 @@ public class SMB2ProcessResponsePacketHandler extends SMB2PacketHandler {
         try {
             packet = smb2Converter.readPacket(request.getPacket(), packetData);
         } catch (Buffer.BufferException e) {
-            logger.error("Failed to deserialize SMB2 Packet Data of {}", packetData);
+            System.out.println("tempGT2: Failed to deserialize SMB2 Packet Data of " + packetData);
 
             throw new TransportException("Unable to deserialize SMB2 Packet Data.", e);
         }

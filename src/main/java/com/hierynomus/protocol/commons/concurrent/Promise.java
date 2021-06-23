@@ -15,9 +15,6 @@
  */
 package com.hierynomus.protocol.commons.concurrent;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.Condition;
@@ -32,7 +29,6 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class Promise<V, T extends Throwable> {
 
-    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private final String name;
     private final ExceptionWrapper<T> wrapper;
@@ -75,7 +71,7 @@ public class Promise<V, T extends Throwable> {
     public void deliver(V val) {
         lock.lock();
         try {
-            logger.debug("Setting << {} >> to `{}`", name, val);
+            System.out.println("tempGT2: Setting << " + name + " >> to `" + val + "`");
             this.val = val;
             cond.signalAll();
         } finally {
@@ -160,7 +156,7 @@ public class Promise<V, T extends Throwable> {
                 return val;
             }
 
-            logger.debug("Awaiting << {} >>", name);
+            System.out.println("tempGT2: Awaiting << " + name + " >>");
 
             if (timeout == 0) {
                 while (val == null && pendingEx == null) {
@@ -173,7 +169,7 @@ public class Promise<V, T extends Throwable> {
             }
 
             if (pendingEx != null) {
-                logger.error("<< {} >> woke to: {}", name, pendingEx);
+                System.out.println("tempGT2: << " + name + " >> woke to: " + pendingEx);
                 throw pendingEx;
             }
 

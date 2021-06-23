@@ -23,8 +23,6 @@ import com.hierynomus.protocol.transport.PacketHandlers;
 import com.hierynomus.protocol.transport.TransportException;
 import com.hierynomus.protocol.transport.TransportLayer;
 import com.hierynomus.smbj.common.SMBRuntimeException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -45,7 +43,6 @@ public class AsyncDirectTcpTransport<D extends PacketData<?>, P extends Packet<?
     private static final int DEFAULT_CONNECT_TIMEOUT = 5000;
     private static final int DIRECT_HEADER_SIZE = 4;
 
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final PacketHandlers<D, P> handlers;
     private final AsynchronousSocketChannel socketChannel;
     private final AsyncPacketReader<D> packetReader;
@@ -71,7 +68,7 @@ public class AsyncDirectTcpTransport<D extends PacketData<?>, P extends Packet<?
     @Override
     public void write(P packet) throws TransportException {
         ByteBuffer bufferToSend = prepareBufferToSend(packet); // Serialize first, as it might throw
-        logger.trace("Sending packet << {} >>", packet);
+        System.out.println("tempGT2: Sending packet << " + packet + " >>");
         writeOrEnqueue(bufferToSend);
     }
 
@@ -125,7 +122,7 @@ public class AsyncDirectTcpTransport<D extends PacketData<?>, P extends Packet<?
 
             @Override
             public void completed(Integer result, Object attachment) {
-                logger.trace("Written {} bytes to async transport", result);
+                System.out.println("tempGT2: Written " + result + " bytes to async transport");
                 startNextWriteIfWaiting();
             }
 

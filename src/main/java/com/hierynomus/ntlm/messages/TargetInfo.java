@@ -25,12 +25,8 @@ import com.hierynomus.protocol.commons.EnumWithValue;
 import com.hierynomus.protocol.commons.buffer.Buffer;
 import com.hierynomus.protocol.commons.buffer.Endian;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class TargetInfo {
-    private static final Logger logger = LoggerFactory.getLogger(TargetInfo.class);
-
     private Map<AvId, Object> targetInfo = new HashMap<>();
 
     TargetInfo() {}
@@ -39,7 +35,7 @@ public class TargetInfo {
         while (true) {
             int l = buffer.readUInt16();
             AvId avId = EnumWithValue.EnumUtils.valueOf(l, AvId.class, null); // AvId (2 bytes)
-            logger.trace("NTLM channel contains {}({}) TargetInfo", avId, l);
+            System.out.println("tempGT2: NTLM channel contains " + avId + "(" + l + ") TargetInfo");
             int avLen = buffer.readUInt16(); // AvLen (2 bytes)
             switch (avId) {
                 case MsvAvEOL:

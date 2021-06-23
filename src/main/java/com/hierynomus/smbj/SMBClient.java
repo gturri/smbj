@@ -20,8 +20,6 @@ import com.hierynomus.smbj.event.ConnectionClosed;
 import com.hierynomus.smbj.event.SMBEventBus;
 import com.hierynomus.smbj.server.ServerList;
 import net.engio.mbassy.listener.Handler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -112,21 +110,20 @@ public class SMBClient implements Closeable {
         synchronized (this) {
             String hostPort = event.getHostname() + ":" + event.getPort();
             connectionTable.remove(hostPort);
-            logger.debug("Connection to << {} >> closed", hostPort);
+            System.out.println("tempGT2: Connection to << " + hostPort + " >> closed");
         }
     }
 
-    private static final Logger logger = LoggerFactory.getLogger(SMBClient.class);
 
     @Override
     public void close() {
-        logger.info("Going to close all remaining connections");
+        System.out.println("tempGT2: Going to close all remaining connections");
         for (Connection connection : connectionTable.values()) {
             try {
                 connection.close();
             } catch (Exception e) {
-                logger.debug("Error closing connection to host {}", connection.getRemoteHostname());
-                logger.debug("Exception was: ", e);
+                System.out.println("tempGT2: Error closing connection to host " + connection.getRemoteHostname());
+                System.out.println("tempGT2: Exception was: " + e);
             }
         }
     }

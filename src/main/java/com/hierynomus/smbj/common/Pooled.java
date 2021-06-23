@@ -29,7 +29,10 @@ public class Pooled<A extends Pooled<A>> {
      * @return <code>this</code> if the object is still valid (has at least 1 lease), else <code>null</code>
      */
     public A lease() {
-        if (leases.getAndIncrement() > 0) {
+        System.out.println("tempGT2: [lease] leases is: " + leases.get());
+        int i = leases.getAndIncrement();
+        System.out.println("tempGT2: [lease] leases is now: " + i);
+        if (i > 0) {
             return (A) this;
         }
         return null;
@@ -41,7 +44,10 @@ public class Pooled<A extends Pooled<A>> {
      * @return <code>true</code> if this was the last outstanding lease. Else <code>false</code>
      */
     public boolean release() {
-        return leases.decrementAndGet() <= 0;
+        System.out.println("tempGT2: [release] leases is: " + leases.get());
+        int i = leases.decrementAndGet();
+        System.out.println("tempGT2: [release] leases is now: " + i);
+        return i <= 0;
     }
 }
 

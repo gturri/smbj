@@ -37,8 +37,6 @@ import com.hierynomus.smbj.paths.PathResolveException;
 import com.hierynomus.smbj.paths.PathResolver;
 import com.hierynomus.smbj.share.*;
 import net.engio.mbassy.listener.Handler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.crypto.SecretKey;
 import java.io.IOException;
@@ -54,7 +52,6 @@ import static java.lang.String.format;
  * A Session
  */
 public class Session implements AutoCloseable {
-    private static final Logger logger = LoggerFactory.getLogger(Session.class);
     private long sessionId;
 
     private Connection connection;
@@ -107,7 +104,7 @@ public class Session implements AutoCloseable {
         }
         Share connectedShare = treeConnectTable.getTreeConnect(shareName);
         if (connectedShare != null) {
-            logger.debug("Returning cached Share {} for {}", connectedShare, shareName);
+            System.out.println("tempGT2: Returning cached Share " + connectedShare + "for " + shareName);
             return connectedShare;
         } else {
             return connectTree(shareName);
@@ -117,7 +114,7 @@ public class Session implements AutoCloseable {
     private Share connectTree(final String shareName) {
         String remoteHostname = connection.getRemoteHostname();
         final SmbPath smbPath = new SmbPath(remoteHostname, shareName);
-        logger.info("Connecting to {} on session {}", smbPath, sessionId);
+        System.out.println("tempGT2: Connecting to " + smbPath + " on session " + sessionId);
         try {
             SMB2TreeConnectRequest smb2TreeConnectRequest = new SMB2TreeConnectRequest(connection.getNegotiatedProtocol().getDialect(), smbPath, sessionId);
             smb2TreeConnectRequest.getHeader().setCreditRequest(256);
@@ -129,7 +126,7 @@ public class Session implements AutoCloseable {
                     public Share apply(SmbPath target) {
                         Session session = Session.this;
                         if (!target.isOnSameHost(smbPath)) {
-                            logger.info("Re-routing the connection to host {}", target.getHostname());
+                            System.out.println("tempGT2: Re-routing the connection to host " + target.getHostname());
                             session = getNestedSession(target);
                         }
                         if (!target.isOnSameShare(smbPath)) {
@@ -147,7 +144,7 @@ public class Session implements AutoCloseable {
             }
 
             if (NtStatus.isError(response.getHeader().getStatusCode())) {
-                logger.debug(response.getHeader().toString());
+                System.out.println("tempGT2: " + response.getHeader().toString());
                 throw new SMBApiException(response.getHeader(), "Could not connect to " + smbPath);
             }
 
@@ -223,30 +220,30 @@ public class Session implements AutoCloseable {
     @SuppressWarnings("unused")
     private void disconnectTree(TreeDisconnected disconnectEvent) {
         if (disconnectEvent.getSessionId() == sessionId) {
-            logger.debug("Notified of TreeDisconnected <<{}>>", disconnectEvent.getTreeId());
+            System.out.println("tempGT2: Notified of TreeDisconnected << " + disconnectEvent.getTreeId() + " >>");
             treeConnectTable.closed(disconnectEvent.getTreeId());
         }
     }
 
     public void logoff() throws TransportException {
         try {
-            logger.info("Logging off session {} from host {}", sessionId, connection.getRemoteHostname());
+            System.out.println("tempGT2: Logging off session " + sessionId + " from host " + connection.getRemoteHostname());
             for (Share share : treeConnectTable.getOpenTreeConnects()) {
                 try {
                     share.close();
                 } catch (IOException e) {
-                    logger.error("Caught exception while closing TreeConnect with id: {}", share.getTreeConnect().getTreeId(), e);
+                    System.out.println("tempGT2: Caught exception while closing TreeConnect with id: " +  share.getTreeConnect().getTreeId() + ": " + e);
                 }
             }
 
             nestedSessionsRwLock.writeLock().lock();
             try {
                 for (Session nestedSession : nestedSessionsByHost.values()) {
-                    logger.info("Logging off nested session {} for session {}", nestedSession.getSessionId(), sessionId);
+                    System.out.println("tempGT2: Logging off nested session " + nestedSession.getSessionId() + " for session " + sessionId);
                     try {
                         nestedSession.logoff();
                     } catch (TransportException te) {
-                        logger.error("Caught exception while logging off nested session {}", nestedSession.getSessionId());
+                        System.out.println("tempGT2: Caught exception while logging off nested session " + nestedSession.getSessionId());
                     }
                 }
             } finally {

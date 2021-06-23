@@ -23,8 +23,6 @@ import com.hierynomus.smbj.common.SMBRuntimeException;
 import com.hierynomus.smbj.connection.PacketEncryptor;
 import com.hierynomus.smbj.connection.SessionTable;
 import com.hierynomus.smbj.session.Session;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 
@@ -83,7 +81,6 @@ import java.util.Arrays;
  * </ul>
  */
 public class SMB3DecryptingPacketHandler extends AbstractIncomingPacketHandler {
-    private static final Logger logger = LoggerFactory.getLogger(SMB3DecryptingPacketHandler.class);
     private SessionTable sessionTable;
     private PacketEncryptor encryptor;
 
@@ -100,7 +97,7 @@ public class SMB3DecryptingPacketHandler extends AbstractIncomingPacketHandler {
     @Override
     protected void doHandle(SMBPacketData<?> packetData) throws TransportException {
         SMB3EncryptedPacketData data = (SMB3EncryptedPacketData) packetData;
-        logger.info("Decrypting packet {}", data);
+        System.out.println("tempGT2: Decrypting packet " + data);
 
         if (!encryptor.canDecrypt(data)) {
             next.handle(new DeadLetterPacketData(packetData.getHeader()));
@@ -118,7 +115,7 @@ public class SMB3DecryptingPacketHandler extends AbstractIncomingPacketHandler {
 
         byte[] decryptedProtocolId = Arrays.copyOf(decrypted, 4);
         if (Arrays.equals(decryptedProtocolId, SMB2TransformHeader.ENCRYPTED_PROTOCOL_ID)) {
-            logger.error("Encountered a nested encrypted packet in packet {}, disconnecting the transport", packetData);
+            System.out.println("tempGT2: Encountered a nested encrypted packet in packet " + packetData + " disconnecting the transport");
             throw new TransportException("Cannot nest an encrypted packet in encrypted packet " + packetData);
         } else if (Arrays.equals(decryptedProtocolId, SMB2CompressionTransformHeader.COMPRESSED_PROTOCOL_ID)) {
             handleCompressedPacket(packetData, decrypted);
@@ -127,13 +124,13 @@ public class SMB3DecryptingPacketHandler extends AbstractIncomingPacketHandler {
             handleSMB2Packet(decrypted, data);
             return;
         } else {
-            logger.error("Could not determine the encrypted packet contents of packet {}", packetData);
+            System.out.println("tempGT2: Could not determine the encrypted packet contents of packet " + packetData);
             throw new TransportException("Could not determine the encrypted packet data, disconnecting");
         }
     }
 
     private void handleCompressedPacket(SMBPacketData<?> packetData, byte[] decrypted) throws TransportException {
-        logger.debug("Packet {} is compressed.", packetData);
+        System.out.println("tempGT2: Packet " + packetData + " is compressed.");
         try {
             next.handle(new SMB3CompressedPacketData(decrypted, true));
             // TODO not handling further decompression validation
@@ -146,9 +143,9 @@ public class SMB3DecryptingPacketHandler extends AbstractIncomingPacketHandler {
     private void handleSMB2Packet(byte[] decrypted, SMB3EncryptedPacketData packetData) throws TransportException {
         try {
             SMB2PacketData nextPacket = new SMB2DecryptedPacketData(decrypted);
-            logger.debug("Decrypted packet {} is packet {}.", packetData, nextPacket);
+            System.out.println("tempGT2: Decrypted packet " + packetData + " is packet " + nextPacket);
             if (nextPacket.getHeader().getSessionId() != packetData.getHeader().getSessionId()) {
-                logger.error("Mismatched sessionId between encrypted packet {} and decrypted contents {}", packetData, nextPacket);
+                System.out.println("tempGT2: Mismatched sessionId between encrypted packet " + packetData + " and decrypted contents " + nextPacket);
                 next.handle(new DeadLetterPacketData(nextPacket.getHeader()));
             } else {
                 next.handle(nextPacket);

@@ -29,8 +29,6 @@ import com.hierynomus.smbj.connection.ConnectionContext;
 import com.hierynomus.spnego.NegTokenInit;
 import com.hierynomus.spnego.NegTokenTarg;
 import com.hierynomus.spnego.SpnegoException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -41,7 +39,6 @@ import java.util.Random;
 import static com.hierynomus.ntlm.messages.NtlmNegotiateFlag.*;
 
 public class NtlmAuthenticator implements Authenticator {
-    private static final Logger logger = LoggerFactory.getLogger(NtlmAuthenticator.class);
 
     // The OID for NTLMSSP
     private static final ASN1ObjectIdentifier NTLMSSP = new ASN1ObjectIdentifier("1.3.6.1.4.1.311.2.2.10");
@@ -71,13 +68,13 @@ public class NtlmAuthenticator implements Authenticator {
             if (completed) {
                 return null;
             } else if (!initialized) {
-                logger.debug("Initialized Authentication of {} using NTLM", context.getUsername());
+                System.out.println("tempGT2: Initialized Authentication of " + context.getUsername() + " using NTLM");
                 NtlmNegotiate ntlmNegotiate = new NtlmNegotiate();
                 initialized = true;
                 response.setNegToken(negTokenInit(ntlmNegotiate));
                 return response;
             } else {
-                logger.debug("Received token: {}", ByteArrayUtils.printHex(gssToken));
+                System.out.println("tempGT2: Received token: " + ByteArrayUtils.printHex(gssToken));
                 NtlmFunctions ntlmFunctions = new NtlmFunctions(random, securityProvider);
                 NegTokenTarg negTokenTarg = new NegTokenTarg().read(gssToken);
                 BigInteger negotiationResult = negTokenTarg.getNegotiationResult();
@@ -87,7 +84,7 @@ public class NtlmAuthenticator implements Authenticator {
                 } catch (Buffer.BufferException e) {
                     throw new IOException(e);
                 }
-                logger.debug("Received NTLM challenge from: {}", serverNtlmChallenge.getTargetName());
+                System.out.println("tempGT2: Received NTLM challenge from: " + serverNtlmChallenge.getTargetName());
 
                 response.setWindowsVersion(serverNtlmChallenge.getVersion());
                 response.setNetBiosName(serverNtlmChallenge.getTargetInfo().getAvPairString(AvId.MsvAvNbComputerName));

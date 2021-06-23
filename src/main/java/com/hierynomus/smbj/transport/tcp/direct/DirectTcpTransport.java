@@ -23,8 +23,6 @@ import com.hierynomus.protocol.transport.PacketHandlers;
 import com.hierynomus.protocol.transport.TransportException;
 import com.hierynomus.protocol.transport.TransportLayer;
 import com.hierynomus.smbj.transport.PacketReader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.net.SocketFactory;
 import java.io.BufferedOutputStream;
@@ -39,7 +37,6 @@ import static java.lang.String.format;
  * A transport layer over Direct TCP/IP.
  */
 public class DirectTcpTransport<D extends PacketData<?>, P extends Packet<?>> implements TransportLayer<P> {
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final PacketHandlers<D, P> handlers;
 
     private final ReentrantLock writeLock = new ReentrantLock();
@@ -61,19 +58,19 @@ public class DirectTcpTransport<D extends PacketData<?>, P extends Packet<?>> im
 
     @Override
     public void write(P packet) throws TransportException {
-        logger.trace("Acquiring write lock to send packet << {} >>", packet);
+        System.out.println("tempGT2: Acquiring write lock to send packet << " + packet + " >>");
         writeLock.lock();
         try {
             if (!isConnected()) {
                 throw new TransportException(format("Cannot write %s as transport is disconnected", packet));
             }
             try {
-                logger.debug("Writing packet {}", packet);
+                System.out.println("tempGT2: Writing packet " + packet);
                 Buffer<?> packetData = handlers.getSerializer().write(packet);
                 writeDirectTcpPacketHeader(packetData.available());
                 writePacketData(packetData);
                 output.flush();
-                logger.trace("Packet {} sent, lock released.", packet);
+                System.out.println("tempGT2: Packet " + packet + " sent, lock released.");
             } catch (IOException ioe) {
                 throw new TransportException(ioe);
             }

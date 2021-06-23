@@ -23,8 +23,6 @@ import com.hierynomus.smbj.ProgressListener;
 import com.hierynomus.smbj.common.SMBRuntimeException;
 import com.hierynomus.smbj.io.ArrayByteChunkProvider;
 import com.hierynomus.smbj.io.ByteChunkProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.OutputStream;
 import java.util.List;
@@ -36,8 +34,6 @@ import java.util.concurrent.Future;
  * a file)
  */
 public class SMB2Writer {
-    private static final Logger logger = LoggerFactory.getLogger(SMB2Writer.class);
-
     private Share share;
     private SMB2FileId fileId;
     private String entryName;
@@ -99,7 +95,7 @@ public class SMB2Writer {
     public int write(ByteChunkProvider provider, ProgressListener progressListener) {
         int bytesWritten = 0;
         while (provider.isAvailable()) {
-            logger.debug("Writing to {} from offset {}", this.entryName, provider.getOffset());
+            System.out.println("tempGT2: Writing to " + this.entryName + " from offset " + provider.getOffset());
             SMB2WriteResponse wresp = share.write(fileId, provider);
             bytesWritten += wresp.getBytesWritten();
             if (progressListener != null)
@@ -134,7 +130,7 @@ public class SMB2Writer {
         final List<Future<Integer>> wrespFutureList = new ArrayList<Future<Integer>>();
         while (provider.isAvailable()) {
             // maybe more than one time, need array list to store the write response future
-            logger.debug("Sending async write request to {} from offset {}", this.entryName, provider.getOffset());
+            System.out.println("tempGT2: Sending async write request to " + this.entryName + " from offset " + provider.getOffset());
             Future<SMB2WriteResponse> resp = share.writeAsync(fileId, provider);
             final int bytesWritten = provider.getLastWriteSize();
             wrespFutureList.add(Futures.transform(resp,

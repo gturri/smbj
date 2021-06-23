@@ -24,8 +24,6 @@ import com.hierynomus.security.Mac;
 import com.hierynomus.security.SecurityException;
 import com.hierynomus.security.SecurityProvider;
 import com.hierynomus.smb.SMBBuffer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.crypto.SecretKey;
 import java.util.Arrays;
@@ -34,7 +32,6 @@ import static com.hierynomus.mssmb2.SMB2PacketHeader.*;
 import static com.hierynomus.mssmb2.SMB2MessageFlag.SMB2_FLAGS_SIGNED;
 
 public class PacketSignatory {
-    private static final Logger logger = LoggerFactory.getLogger(PacketSignatory.class);
 
     private SecurityProvider securityProvider;
 
@@ -49,7 +46,7 @@ public class PacketSignatory {
         if (secretKey != null) {
             return new SignedPacketWrapper(packet, secretKey);
         } else {
-            logger.debug("Not wrapping {} as signed, as no key is set.", packet.getHeader().getMessage());
+            System.out.println("tempGT2: Not wrapping " + packet.getHeader() . getMessage() + " as signed, as no key is set.");
             return packet;
         }
     }
@@ -66,9 +63,8 @@ public class PacketSignatory {
             byte[] receivedSignature = packet.getHeader().getSignature();
             for (int i = 0; i < SIGNATURE_SIZE; i++) {
                 if (signature[i] != receivedSignature[i]) {
-                    logger.error("Signatures for packet {} do not match (received: {}, calculated: {})", packet,
-                            Arrays.toString(receivedSignature), Arrays.toString(signature));
-                    logger.error("Packet {} has header: {}", packet, packet.getHeader());
+                    System.out.println("tempGT2: Signatures for packet " + packet + " do not match (received: " + Arrays.toString(receivedSignature) + ", calculated: " + Arrays.toString(signature));
+                    System.out.println("tempGT2: Packet " + packet + " has header: " + packet.getHeader());
                     return false;
                 }
             }

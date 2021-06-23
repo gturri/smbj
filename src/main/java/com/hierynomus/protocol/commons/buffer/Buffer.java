@@ -16,8 +16,6 @@
 package com.hierynomus.protocol.commons.buffer;
 
 import com.hierynomus.protocol.commons.ByteArrayUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -26,7 +24,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
 
 public class Buffer<T extends Buffer<T>> {
-    private static final Logger logger = LoggerFactory.getLogger(Buffer.class);
 
     @SuppressWarnings("serial")
     public static class BufferException extends Exception {
@@ -205,7 +202,7 @@ public class Buffer<T extends Buffer<T>> {
      * Compact this buffer by truncating the read bytes from the array.
      */
     public void compact() {
-        logger.debug("Compacting...");
+        System.out.println("tempGT2: Compacting...");
         if (available() > 0) {
             System.arraycopy(data, rpos, data, 0, wpos - rpos);
         }

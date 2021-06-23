@@ -29,12 +29,7 @@ import com.hierynomus.mssmb2.SMB2FileId;
 import com.hierynomus.mssmb2.SMBApiException;
 import com.hierynomus.smbj.common.SmbPath;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public abstract class DiskEntry extends Open<DiskShare> {
-    protected final Logger logger = LoggerFactory.getLogger(this.getClass());
-
     DiskEntry(SMB2FileId fileId, DiskShare share, SmbPath fileName) {
         super(fileId, fileName, share);
     }

@@ -34,8 +34,6 @@ import com.hierynomus.smbj.SmbConfig;
 import com.hierynomus.smbj.common.SMBRuntimeException;
 import com.hierynomus.smbj.server.Server;
 import com.hierynomus.smbj.utils.DigestUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -50,7 +48,6 @@ import static com.hierynomus.smb.Packets.getPacketBytes;
  * Handles the protocol negotiation.
  */
 class SMBProtocolNegotiator {
-    private static final Logger logger = LoggerFactory.getLogger(SMBProtocolNegotiator.class);
     private final SmbConfig config;
     private final ConnectionContext connectionContext;
     private Connection connection;
@@ -66,7 +63,7 @@ class SMBProtocolNegotiator {
     }
 
     void negotiateDialect() throws TransportException {
-        logger.debug("Negotiating dialects {}", config.getSupportedDialects());
+        System.out.println("tempGT2: Negotiating dialects " + config.getSupportedDialects());
         SMB2NegotiateResponse resp;
         if (config.isUseMultiProtocolNegotiate()) {
             resp = multiProtocolNegotiate();
@@ -82,7 +79,7 @@ class SMBProtocolNegotiator {
         initializeNegotiationContext();
         initializeOrValidateServerDetails();
         connectionContext.negotiated(negotiationContext);
-        logger.debug("Negotiated the following connection settings: {}", connectionContext);
+        System.out.println("tempGT2: Negotiated the following connection settings: " + connectionContext);
     }
 
     private void initializeNegotiationContext() {
@@ -137,7 +134,7 @@ class SMBProtocolNegotiator {
         if (compressionAlgorithms.size() == 0) {
             throw new IllegalStateException("The SMB2CompressionCapabilities NegotiateContext should contain at least 1 algorithm");
         } else if (compressionAlgorithms.size() == 1 && compressionAlgorithms.get(0) == SMB3CompressionAlgorithm.NONE) {
-            logger.info("SMB3CompressionAlgorithm is 'NONE', continuing without compression");
+            System.out.println("tempGT2: SMB3CompressionAlgorithm is 'NONE', continuing without compression");
             return;
         }
 

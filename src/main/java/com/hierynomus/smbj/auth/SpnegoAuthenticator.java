@@ -35,12 +35,9 @@ import org.ietf.jgss.GSSException;
 import org.ietf.jgss.GSSManager;
 import org.ietf.jgss.GSSName;
 import org.ietf.jgss.Oid;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 public class SpnegoAuthenticator implements Authenticator {
-    private static final Logger logger = LoggerFactory.getLogger(SpnegoAuthenticator.class);
     private GSSContextConfig gssContextConfig;
 
     public static class Factory implements com.hierynomus.protocol.commons.Factory.Named<Authenticator> {
@@ -75,7 +72,7 @@ public class SpnegoAuthenticator implements Authenticator {
 
     private AuthenticateResponse authenticateSession(GSSAuthenticationContext context, byte[] gssToken, ConnectionContext connectionContext) throws TransportException {
         try {
-            logger.debug("Authenticating {} on {} using SPNEGO", context.getUsername(), connectionContext.getServerName());
+            System.out.println("tempGT2: Authenticating " + context.getUsername() + " on " + connectionContext.getServerName() + " using SPNEGO");
             if (gssContext == null) {
                 GSSManager gssManager = GSSManager.getInstance();
                 Oid spnegoOid = new Oid("1.3.6.1.5.5.2"); //SPNEGO
@@ -92,7 +89,7 @@ public class SpnegoAuthenticator implements Authenticator {
             byte[] newToken = gssContext.initSecContext(gssToken, 0, gssToken.length);
 
             if (newToken != null) {
-                logger.trace("Received token: {}", ByteArrayUtils.printHex(newToken));
+                System.out.println("tempGT2: Received token: " + ByteArrayUtils.printHex(newToken));
             }
 
             AuthenticateResponse response = new AuthenticateResponse(newToken);

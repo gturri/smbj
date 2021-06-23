@@ -17,8 +17,6 @@ package com.hierynomus.smbj.share;
 
 import com.hierynomus.smbj.ProgressListener;
 import com.hierynomus.smbj.io.ByteChunkProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -29,8 +27,6 @@ class FileOutputStream extends OutputStream {
     private ProgressListener progressListener;
     private boolean isClosed = false;
     private ByteArrayProvider provider;
-
-    private static final Logger logger = LoggerFactory.getLogger(FileOutputStream.class);
 
     FileOutputStream(SMB2Writer writer, int bufferSize, long offset, ProgressListener progressListener) {
         this.writer = writer;
@@ -101,7 +97,7 @@ class FileOutputStream extends OutputStream {
 
         isClosed = true;
         writer = null;
-        logger.debug("EOF, {} bytes written", provider.getOffset());
+        System.out.println("tempGT2: EOF, " + provider.getOffset() + " bytes written");
     }
 
     private void verifyConnectionNotClosed() throws IOException {

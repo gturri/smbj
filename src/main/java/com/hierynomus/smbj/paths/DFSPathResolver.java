@@ -36,15 +36,12 @@ import com.hierynomus.smbj.io.BufferByteChunkProvider;
 import com.hierynomus.smbj.session.Session;
 import com.hierynomus.smbj.share.Share;
 import com.hierynomus.smbj.share.StatusHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 public class DFSPathResolver implements PathResolver {
-    private static final Logger logger = LoggerFactory.getLogger(DFSPathResolver.class);
     private static final long FSCTL_DFS_GET_REFERRALS = 0x00060194L;
     private static final long FSCTL_DFS_GET_REFERRALS_EX = 0x000601B0L;
     private final StatusHandler statusHandler;
@@ -84,16 +81,16 @@ public class DFSPathResolver implements PathResolver {
         }
 
         if (smbPath.getPath() != null && responsePacket.getHeader().getStatusCode() == NtStatus.STATUS_PATH_NOT_COVERED.getValue()) {
-            logger.info("DFS Share {} does not cover {}, resolve through DFS", smbPath.getShareName(), smbPath);
+            System.out.println("tempGT2: DFS Share " + smbPath.getShareName() + " does not cover " + smbPath + ", resolve through DFS");
             return start(session, smbPath, new ResolveAction<T>() {
                 @Override
                 public T apply(SmbPath target) {
-                    logger.info("DFS resolved {} -> {}", smbPath, target);
+                    System.out.println("tempGT2: DFS resolved " + smbPath + " -> " + target);
                     return action.apply(target);
                 }
             });
         } else if (smbPath.getPath() == null && NtStatus.isError(responsePacket.getHeader().getStatusCode())) {
-            logger.info("Attempting to resolve {} through DFS", smbPath);
+            System.out.println("tempGT2: Attempting to resolve " + smbPath + " through DFS");
             return start(session, smbPath, action);
         }
         return wrapped.resolve(session, responsePacket, smbPath, action);
@@ -108,14 +105,14 @@ public class DFSPathResolver implements PathResolver {
     public <T> T resolve(Session session, SmbPath smbPath, ResolveAction<T> action) throws PathResolveException {
         T target = start(session, smbPath, action);
         if (!smbPath.equals(target)) {
-            logger.info("DFS resolved {} -> {}", smbPath, target);
+            System.out.println("tempGT2: DFS resolved " + smbPath + " -> " + target);
             return target;
         }
         return wrapped.resolve(session, smbPath, action);
     }
 
     private <T> T start(Session session, SmbPath uncPath, ResolveAction<T> action) throws PathResolveException {
-        logger.info("Starting DFS resolution for {}", uncPath.toUncPath());
+        System.out.println("tempGT2: Starting DFS resolution for " + uncPath.toUncPath());
         DFSPath dfsPath = new DFSPath(uncPath.toUncPath());
         ResolveState<T> state = new ResolveState<T>(dfsPath, action);
         return step1(session, state);
@@ -125,7 +122,7 @@ public class DFSPathResolver implements PathResolver {
      * Step 1: If the path has only one path component (for example, \abc), go to step 12; otherwise, go to step 2.
      */
     private <T> T step1(Session session, ResolveState<T> state) throws DFSException {
-        logger.trace("DFS[1]: {}", state);
+        System.out.println("tempGT2: DFS[1]: " + state);
         if (state.path.hasOnlyOnePathComponent() || state.path.isIpc()) { // Also shortcircuit IPC$ connects.
             return step12(state);
         }
@@ -144,7 +141,7 @@ public class DFSPathResolver implements PathResolver {
      * step 3.
      */
     private <T> T step2(Session session, ResolveState<T> state) throws DFSException {
-        logger.trace("DFS[2]: {}", state);
+        System.out.println("tempGT2: DFS[2]: " + state);
         ReferralCache.ReferralCacheEntry lookup = referralCache.lookup(state.path);
         if (lookup == null || (lookup.isExpired() && lookup.isRoot())) {
             return step5(session, state); // Resolve Root Referral
@@ -166,7 +163,7 @@ public class DFSPathResolver implements PathResolver {
      * \someserver\someshare\somepath\MyDir. Go to step 8.
      */
     private <T> T step3(Session session, ResolveState<T> state, ReferralCache.ReferralCacheEntry lookup) {
-        logger.trace("DFS[3]: {}", state);
+        System.out.println("tempGT2: DFS[3]: " + state);
         ReferralCache.TargetSetEntry target = lookup.getTargetHint();
         SMBApiException lastException = null;
         DFSPath initialPath = state.path;
@@ -199,7 +196,7 @@ public class DFSPathResolver implements PathResolver {
      * - If Interlink is not set in the ReferralCache entry then the TargetHint is not in another DFS namespace. Go to step 3.
      */
     private <T> T step4(Session session, ResolveState<T> state, ReferralCache.ReferralCacheEntry lookup) throws DFSException {
-        logger.trace("DFS[4]: {}", state);
+        System.out.println("tempGT2: DFS[4]: " + state);
         if (state.path.isSysVolOrNetLogon()) {
             return step3(session, state, lookup);
         }
@@ -222,7 +219,7 @@ public class DFSPathResolver implements PathResolver {
      * 3. Use DCHint as host name for DFS root referral request purposes. Go to step 6.
      */
     private <T> T step5(Session session, ResolveState<T> state) throws DFSException {
-        logger.trace("DFS[5]: {}", state);
+        System.out.println("tempGT2: DFS[5]: " + state);
         String potentialDomain = state.path.getPathComponents().get(0);
         DomainCache.DomainCacheEntry domainCacheEntry = domainCache.lookup(potentialDomain);
         if (domainCacheEntry == null) { // 5.1
@@ -266,7 +263,7 @@ public class DFSPathResolver implements PathResolver {
      * 3. The path is not a DFS path and no further processing is required. Go to step 12.
      */
     private <T> T step6(Session session, ResolveState<T> state) throws DFSException {
-        logger.trace("DFS[6]: {}", state);
+        System.out.println("tempGT2: DFS[6]: " + state);
         ReferralResult result = sendDfsReferralRequest(DfsRequestType.ROOT, state.path.getPathComponents().get(0), session, state.path);
         if (NtStatus.isSuccess(result.status)) {
             return step7(session, state, result.referralCacheEntry);
@@ -287,7 +284,7 @@ public class DFSPathResolver implements PathResolver {
      * root targets, go to step 3; otherwise, go to step 4.
      */
     private <T> T step7(Session session, ResolveState<T> state, ReferralCache.ReferralCacheEntry lookup) throws DFSException {
-        logger.trace("DFS[7]: {}", state);
+        System.out.println("tempGT2: DFS[7]: " + state);
         if (lookup.isRoot()) {
             return step3(session, state, lookup);
         }
@@ -310,7 +307,7 @@ public class DFSPathResolver implements PathResolver {
      */
     @SuppressWarnings("PMD.UnusedFormalParameter")
     private <T> T step8(Session session, ResolveState<T> state, ReferralCache.ReferralCacheEntry lookup) {
-        logger.trace("DFS[8]: {}", state);
+        System.out.println("tempGT2: DFS[8]: " + state);
         return state.action.apply(SmbPath.parse(state.path.toPath()));
     }
 
@@ -328,11 +325,11 @@ public class DFSPathResolver implements PathResolver {
      */
     @SuppressWarnings("PMD.UnusedFormalParameter")
     private <T> T step9(Session session, ResolveState<T> state, ReferralCache.ReferralCacheEntry lookup) throws DFSException {
-        logger.trace("DFS[9]: {}", state);
+        System.out.println("tempGT2: DFS[9]: " + state);
         DFSPath rootPath = new DFSPath(state.path.getPathComponents().subList(0, 2));
         ReferralCache.ReferralCacheEntry rootReferralCacheEntry = referralCache.lookup(rootPath);
         if (rootReferralCacheEntry == null) {
-            logger.debug("Could not find referral cache entry for {}", rootPath);
+            System.out.println("tempGT2: Could not find referral cache entry for " + rootPath);
             referralCache.clear(state.path);
             return step1(session, state);
         }
@@ -357,7 +354,7 @@ public class DFSPathResolver implements PathResolver {
      * If the referral request is successful, go to step 3; otherwise, go to step 13.
      */
     private <T> T step10(Session session, ResolveState<T> state, DomainCache.DomainCacheEntry domainCacheEntry) throws DFSException {
-        logger.trace("DFS[10]: {}", state);
+        System.out.println("tempGT2: DFS[10]: " + state);
         ReferralResult r = sendDfsReferralRequest(DfsRequestType.SYSVOL, domainCacheEntry.getDCHint(), session, state.path);
         if (NtStatus.isSuccess(r.status)) {
             return step3(session, state, r.referralCacheEntry);
@@ -373,7 +370,7 @@ public class DFSPathResolver implements PathResolver {
      * \someserver\someshare\somepath\MyDir. Go to step 2.
      */
     private <T> T step11(Session session, ResolveState<T> state, ReferralCache.ReferralCacheEntry lookup) throws DFSException {
-        logger.trace("DFS[11]: {}", state);
+        System.out.println("tempGT2: DFS[11]: " + state);
         state.path = state.path.replacePrefix(lookup.getDfsPathPrefix(), lookup.getTargetHint().getTargetPath());
         state.isDFSPath = true;
         return step2(session, state);
@@ -385,7 +382,7 @@ public class DFSPathResolver implements PathResolver {
      * The user/application initiated I/O request is handled by the local operating system.
      */
     private <T> T step12(ResolveState<T> state) {
-        logger.trace("DFS[12]: {}", state);
+        System.out.println("tempGT2: DFS[12]: " + state);
         return state.action.apply(SmbPath.parse(state.path.toPath()));
     }
 
@@ -396,7 +393,7 @@ public class DFSPathResolver implements PathResolver {
      */
     @SuppressWarnings("PMD.UnusedFormalParameter")
     private <T> T step13(Session session, ResolveState<T> state, ReferralResult result) throws DFSException {
-        logger.trace("DFS[13]: {}", state);
+        System.out.println("tempGT2: DFS[13]: " + state);
         throw new DFSException(result.status, "Cannot get DC for domain '" + state.path.getPathComponents().get(0) + "'");
     }
 
@@ -407,7 +404,7 @@ public class DFSPathResolver implements PathResolver {
      */
     @SuppressWarnings("PMD.UnusedFormalParameter")
     private <T> T step14(Session session, ResolveState<T> state, ReferralResult result) throws DFSException {
-        logger.trace("DFS[14]: {}", state);
+        System.out.println("tempGT2: DFS[14]: " + state);
         throw new DFSException(result.status, "DFS request failed for path " + state.path);
     }
 
@@ -480,7 +477,7 @@ public class DFSPathResolver implements PathResolver {
             return;
         }
         ReferralCache.ReferralCacheEntry referralCacheEntry = new ReferralCache.ReferralCacheEntry(response, domainCache);
-        logger.info("Got DFS Referral result: {}", referralCacheEntry);
+        System.out.println("tempGT2: Got DFS Referral result: " + referralCacheEntry);
         referralCache.put(referralCacheEntry);
         result.referralCacheEntry = referralCacheEntry;
     }

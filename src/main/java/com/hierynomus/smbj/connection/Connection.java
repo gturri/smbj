@@ -62,16 +62,12 @@ import com.hierynomus.smbj.paths.SymlinkPathResolver;
 import com.hierynomus.smbj.server.ServerList;
 import com.hierynomus.smbj.session.Session;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import net.engio.mbassy.listener.Handler;
 
 /**
  * A connection to a server.
  */
 public class Connection extends Pooled<Connection> implements Closeable, PacketReceiver<SMBPacketData<?>> {
-    private static final Logger logger = LoggerFactory.getLogger(Connection.class);
     private static final DelegatingSMBMessageConverter converter = new DelegatingSMBMessageConverter(new SMB3EncryptedPacketFactory(), new SMB3CompressedPacketFactory(), new SMB2PacketFactory(), new SMB1PacketFactory());
     private IncomingPacketHandler packetHandlerChain;
 
@@ -147,7 +143,7 @@ public class Connection extends Pooled<Connection> implements Closeable, PacketR
             this.pathResolver = new DFSPathResolver(pathResolver, config.getTransactTimeout());
         }
 
-        logger.info("Successfully connected to: {}", getRemoteHostname());
+        System.out.println("tempGT2: Successfully connected to: {} " + getRemoteHostname());
     }
 
     @Override
@@ -177,13 +173,13 @@ public class Connection extends Pooled<Connection> implements Closeable, PacketR
                     try {
                         session.close();
                     } catch (IOException e) {
-                        logger.warn("Exception while closing session {}", session.getSessionId(), e);
+                        System.out.println("tempGT2: Exception while closing session " + session.getSessionId() + ": " + e);
                     }
                 }
             }
         } finally {
             transport.disconnect();
-            logger.info("Closed connection to {}", getRemoteHostname());
+            System.out.println("tempGT2: Closed connection to " + getRemoteHostname());
             bus.publish(new ConnectionClosed(connectionContext.getServer().getServerName(), connectionContext.getServer().getPort()));
         }
     }
@@ -217,13 +213,12 @@ public class Connection extends Pooled<Connection> implements Closeable, PacketR
                 int availableCredits = sequenceWindow.available();
                 int grantCredits = calculateGrantedCredits(packet, availableCredits);
                 if (availableCredits == 0) {
-                    logger.warn(
-                        "There are no credits left to send {}, will block until there are more credits available.",
-                        packet.getHeader().getMessage());
+                    System.out.println(
+                        "tempGT2: There are no credits left to send " + packet.getHeader().getMessage() + ", will block until there are more credits available.");
                 }
                 long[] messageIds = sequenceWindow.get(grantCredits);
                 packet.getHeader().setMessageId(messageIds[0]);
-                logger.debug("Granted {} (out of {}) credits to {}", grantCredits, availableCredits, packet);
+                System.out.println("tempGT2: Granted " + grantCredits + " (out of " + availableCredits + ") credits to " + packet);
                 packet.getHeader().setCreditRequest(Math
                     .max(SequenceWindow.PREFERRED_MINIMUM_CREDITS - availableCredits - grantCredits, grantCredits));
 
@@ -247,7 +242,7 @@ public class Connection extends Pooled<Connection> implements Closeable, PacketR
         int maxPayloadSize = packet.getMaxPayloadSize();
         int creditsNeeded = creditsNeeded(maxPayloadSize);
         if (creditsNeeded > 1 && !connectionContext.supportsMultiCredit()) {
-            logger.trace("Connection to {} does not support multi-credit requests.", getRemoteHostname());
+            System.out.println("tempGT2: Connection to " + getRemoteHostname() + " does not support multi-credit requests.");
             grantCredits = 1;
         } else if (creditsNeeded < availableCredits) { // Scale the credits dynamically
             grantCredits = creditsNeeded;
@@ -294,7 +289,7 @@ public class Connection extends Pooled<Connection> implements Closeable, PacketR
             this.close();
         } catch (Exception e) {
             String exceptionClass = e.getClass().getSimpleName();
-            logger.debug("{} while closing connection on error, ignoring: {}", exceptionClass, e.getMessage());
+            System.out.println("tempGT2: " + exceptionClass + " while closing connection on error, ignoring: " + e.getMessage());
         }
     }
 
@@ -314,7 +309,7 @@ public class Connection extends Pooled<Connection> implements Closeable, PacketR
     @SuppressWarnings("unused")
     private void sessionLogoff(SessionLoggedOff loggedOff) {
         sessionTable.removeSession(loggedOff.getSessionId());
-        logger.debug("Session << {} >> logged off", loggedOff.getSessionId());
+        System.out.println("tempGT2: Session << " + loggedOff.getSessionId() + " >> logged off");
     }
 
     private static class DelegatingSMBMessageConverter implements PacketFactory<SMBPacketData<?>> {
@@ -367,7 +362,7 @@ public class Connection extends Pooled<Connection> implements Closeable, PacketR
                 sessionTable.find(sessionId).send(cancel);
                 // transport.write(cancel);
             } catch (TransportException e) {
-                logger.error("Failed to send {}", cancel);
+                System.out.println("tempGT2: Failed to send " + cancel);
             }
         }
     }

@@ -18,8 +18,6 @@ package com.hierynomus.smbj.connection.packet;
 import com.hierynomus.mssmb2.SMB2PacketData;
 import com.hierynomus.protocol.transport.TransportException;
 import com.hierynomus.smbj.connection.SequenceWindow;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * [MS-SMB2] 3.2.5.1.4 Granting Message Credits
@@ -30,7 +28,6 @@ import org.slf4j.LoggerFactory;
  * available message identifiers to continue processing.
  */
 public class SMB2CreditGrantingPacketHandler extends SMB2PacketHandler {
-    private static final Logger logger = LoggerFactory.getLogger(SMB2CreditGrantingPacketHandler.class);
     private SequenceWindow sequenceWindow;
 
     public SMB2CreditGrantingPacketHandler(SequenceWindow sequenceWindow) {
@@ -40,7 +37,7 @@ public class SMB2CreditGrantingPacketHandler extends SMB2PacketHandler {
     @Override
     protected void doSMB2Handle(SMB2PacketData packetData) throws TransportException {
         sequenceWindow.creditsGranted(packetData.getHeader().getCreditResponse());
-        logger.debug("Server granted us {} credits for {}, now available: {} credits", packetData.getHeader().getCreditResponse(), packetData, sequenceWindow.available());
+        System.out.println("tempGT2: Server granted us " + packetData.getHeader() + " credits for " + packetData + ", now available: " + sequenceWindow.available() + " credits");
         next.handle(packetData);
     }
 }

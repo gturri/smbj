@@ -19,15 +19,12 @@ import net.engio.mbassy.bus.SyncMessageBus;
 import net.engio.mbassy.bus.common.PubSubSupport;
 import net.engio.mbassy.bus.error.IPublicationErrorHandler;
 import net.engio.mbassy.bus.error.PublicationError;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Our own delegating class to wrap the MBassador event bus. This ensures that we only need to use their annotations
  * throughout the codebase, and can easily switch it out if need be.
  */
 public class SMBEventBus {
-    private static final Logger logger = LoggerFactory.getLogger(SMBEventBus.class);
 
     private PubSubSupport<SMBEvent> wrappedBus;
 
@@ -36,9 +33,9 @@ public class SMBEventBus {
             @Override
             public void handleError(PublicationError error) {
                 if (error.getCause() != null) {
-                    logger.error(error.toString(), error.getCause());
+                    System.out.println("tempGT2: " + error.toString() + ", " + error.getCause());
                 } else {
-                    logger.error(error.toString());
+                    System.out.println("tempGT2: " + error.toString());
                 }
             }
         }));

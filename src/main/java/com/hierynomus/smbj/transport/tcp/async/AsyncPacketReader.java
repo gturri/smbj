@@ -28,12 +28,7 @@ import com.hierynomus.protocol.commons.buffer.Buffer.BufferException;
 import com.hierynomus.protocol.transport.PacketFactory;
 import com.hierynomus.protocol.transport.PacketReceiver;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class AsyncPacketReader<D extends PacketData<?>> {
-    private static final Logger logger = LoggerFactory.getLogger(AsyncPacketReader.class);
-
     private final PacketFactory<D> packetFactory;
     private PacketReceiver<D> handler;
     private final AsynchronousSocketChannel channel;
@@ -61,16 +56,16 @@ public class AsyncPacketReader<D extends PacketData<?>> {
 
     private void initiateNextRead(PacketBufferReader bufferReader) {
         if (stopped.get()) {
-            logger.trace("Stopped, not initiating another read operation.");
+            System.out.println("tempGT2: Stopped, not initiating another read operation.");
             return;
         }
-        logger.trace("Initiating next read");
+        System.out.println("tempGT2: Initiating next read");
         channel.read(bufferReader.getBuffer(), this.soTimeout, TimeUnit.MILLISECONDS, bufferReader,
             new CompletionHandler<Integer, PacketBufferReader>() {
 
                 @Override
                 public void completed(Integer bytesRead, PacketBufferReader reader) {
-                    logger.trace("Received {} bytes", bytesRead);
+                    System.out.println("tempGT2: Received " + bytesRead + " bytes");
                     if (bytesRead < 0) {
                         handleClosedReader();
                         return; // stop the read cycle
@@ -107,7 +102,7 @@ public class AsyncPacketReader<D extends PacketData<?>> {
     private void readAndHandlePacket(byte[] packetBytes) {
         try {
             D packet = packetFactory.read(packetBytes);
-            logger.trace("Received packet << {} >>", packet);
+            System.out.println("tempGT2: Received packet << " + packet + " >>");
             handler.handle(packet);
         } catch (BufferException | IOException e) {
             handleAsyncFailure(e);
@@ -116,11 +111,11 @@ public class AsyncPacketReader<D extends PacketData<?>> {
 
     private void handleAsyncFailure(Throwable exc) {
         if (isChannelClosedByOtherParty(exc)) {
-            logger.trace("Channel to {} closed by other party, closing it locally.", remoteHost);
+            System.out.println("tempGT2: Channel to " + remoteHost + " closed by other party, closing it locally.");
         } else {
             String excClass = exc.getClass().getSimpleName();
-            logger.error("{} on channel to {}, closing channel: {}", excClass, remoteHost, exc.getMessage());
-            logger.debug("Exception was: ", exc);
+            System.out.println("tempGT2: " + excClass + " on channel to " + remoteHost + ", closing channel: " + exc.getMessage());
+            System.out.println("tempGT2: Exception was: " +  exc);
         }
         closeChannelQuietly();
     }
@@ -134,7 +129,7 @@ public class AsyncPacketReader<D extends PacketData<?>> {
             channel.close();
         } catch (IOException e) {
             String eClass = e.getClass().getSimpleName();
-            logger.debug("{} while closing channel to {} on failure: {}", eClass, remoteHost, e.getMessage());
+            System.out.println("tempGT2: " + eClass + " while closing channel to " + remoteHost + " on failure: " + e.getMessage());
         }
     }
 
